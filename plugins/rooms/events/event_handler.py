@@ -38,7 +38,31 @@ class EventHandler(commands.Cog):
 
     def __init__(self, bot: Thalia):
         self.bot = bot
+        
+        bot.loop.create_task(self.room_handler_task())
+        
+    async def author_getter(room):
+        while True:
+            if self.bot.rooms[room]['author'] not in self.bot.rooms[room]['vc'].members:
+                await asycio.sleep(5) # save some memory or whatever
+                continue
+            else:
+                return
 
+    async def room_handler_task(self):
+        while True:
+            for room in self.bot.rooms:
+                if self.bot.rooms[room]['author'] not in self.bot.rooms[room]['vc'].members:
+                    try:
+                        async with timeout(300):
+                            await self.author_getter(room)
+                    except asyncio.TimeoutError:
+                        await self.bot.rooms[room]['vc'].delete()
+                        await self.bot.rooms[room]['tc'].delete()
+                        del self.bot.rooms[room]
+                            
+                        
+        
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Handle voice state updates.
