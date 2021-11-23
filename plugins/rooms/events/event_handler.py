@@ -27,6 +27,7 @@ from discord.ext import commands
 
 from core import Thalia
 
+from constants import VOICE_JOIN_ID
 
 class EventHandler(commands.Cog):
     """Initialize EventHandler Cog
@@ -67,7 +68,23 @@ class EventHandler(commands.Cog):
            member: discord.Member - The member to whom the join pertains.
            context: payload - The data object of the voice state.
         """
-        pass
+        if context.channel.id == VOICE_JOIN_ID:
+            name = member.user.name = "'s" if member.user.name.lower().endswith("s") == False else name = member.user.name + "'" # make channel name scheme consistent with English grammar rules
+            category = discord.utils.get(ctx.guild.categories, id = GENERAL_CATEGORY_ID)
+            voice_channel = await context.channel.guild.create_voice_channel(name, category=category)
+            text_channel = await context.channel.guild.create_text_channel(name, category=category)
+            
+            await text_channel.set_permissions(context.channel.guild.default_role, read_messages=False)
+            
+            # add room to bot cache
+            self.bot.rooms[str(voice_channel.id)] = {}
+            self.bot.rooms[str(voice_channel.id)]['vc'] = voice_channel
+            self.bot.rooms[str(voice_channel.id)]['tc'] = text_channel
+            self.bot.rooms[str(voice_channel.id)]['author'] = member
+            
+        else:
+            await self.bot.rooms[str(context.channel.id)]['tc'].set_permissions(member, read_messages=True)
+            
         
     async def on_member_leave(member, context):
         """Handle voice channel leave.
@@ -76,7 +93,18 @@ class EventHandler(commands.Cog):
            member: discord.Member - The member to whom the leave pertains.
            context: payload - The data object of the voice state.
         """
-        pass
+        if context.channel.id == VOICE_JOIN_ID:
+            pass
+            
+        if context.channel.id in self.bot.rooms:
+            await self.bot.rooms[str(context.channel.id)]['tc'].set_permissions(member, read_messages=False)
+            
+            if await self.bot.rooms[str(context.channel.id)]['author'].id == member.id:
+                embed = discord.Embed(
+                    description="⚠️ The channel owner has left. The room will expire in 5 minutes. ⚠️",
+                    color=discord.Colour.red()
+                )
+                await self.bot.rooms[str(context.channel.id)]['tc'].send(embed=embed)
         
     async def on_member_move(member, before, after):
         """Handle voice channel leave.
@@ -86,4 +114,13 @@ class EventHandler(commands.Cog):
            before: payload - The data object of the voice state before the move.
            after: payload - The data object of the voice state after the move.
         """
-        pass
+        if after.channel.id == VOICE_JOIN_ID:
+            await self.on_member_join(member, after)
+            
+        else:
+            if self.bot.rooms[str(before.channel.id)]['author'].id == member.id:
+                await self.on_member_leave(member, before)
+                
+            else:
+                await self.bot.rooms[str(before.channel.id)]['tc'].set_permissions(member, read_message=False)
+                await self.bot.rooms[str(after.channel.id)]['tc'].set_permissions(member, read_message=True)
