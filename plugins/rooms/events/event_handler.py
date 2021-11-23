@@ -22,15 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-import asycnio
+import asyncio
 
 import discord
 from discord.ext import commands
+from discord.commands import slash_command, Option
 
 from core import Thalia
 
 from constants import VOICE_JOIN_ID
 from constants import GENERAL_CATEGORY_ID
+from constants import GUILD_IDS
 
 from async_timeout import timeout
 
@@ -44,7 +46,7 @@ class EventHandler(commands.Cog):
     def __init__(self, bot: Thalia):
         self.bot = bot
         
-        bot.loop.create_task(self.room_handler_task())
+        # bot.loop.create_task(self.room_handler_task())
         
     async def author_getter(room):
         while True:
@@ -66,8 +68,7 @@ class EventHandler(commands.Cog):
                         await self.bot.rooms[room]['tc'].delete()
                         del self.bot.rooms[room]
                             
-                        
-        
+
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Handle voice state updates.
@@ -90,7 +91,7 @@ class EventHandler(commands.Cog):
             await self.on_member_move(member, before, after)
             
             
-    async def on_member_join(member, context):
+    async def on_member_join(self, member, context):
         """Handle voice channel joins.
 
         Parameters:
@@ -98,8 +99,9 @@ class EventHandler(commands.Cog):
            context: payload - The data object of the voice state.
         """
         if context.channel.id == VOICE_JOIN_ID:
-            name = member.user.name = "'s" if member.user.name.lower().endswith("s") == False else name = member.user.name + "'" # make channel name scheme consistent with English grammar rules
-            category = discord.utils.get(ctx.guild.categories, id = GENERAL_CATEGORY_ID)
+            if member.name.lower().endswith("s") == False: name = member.name + "'s"
+            else: name = member.name + "'" # make channel name scheme consistent with English grammar rules
+            category = discord.utils.get(context.channel.guild.categories, id = GENERAL_CATEGORY_ID)
             voice_channel = await context.channel.guild.create_voice_channel(name, category=category)
             text_channel = await context.channel.guild.create_text_channel(name, category=category)
             
@@ -115,7 +117,7 @@ class EventHandler(commands.Cog):
             await self.bot.rooms[str(context.channel.id)]['tc'].set_permissions(member, read_messages=True)
             
         
-    async def on_member_leave(member, context):
+    async def on_member_leave(self, member, context):
         """Handle voice channel leave.
 
         Parameters:
@@ -135,7 +137,7 @@ class EventHandler(commands.Cog):
                 )
                 await self.bot.rooms[str(context.channel.id)]['tc'].send(embed=embed)
         
-    async def on_member_move(member, before, after):
+    async def on_member_move(self, member, before, after):
         """Handle voice channel leave.
 
         Parameters:
@@ -147,6 +149,8 @@ class EventHandler(commands.Cog):
             await self.on_member_join(member, after)
             
         else:
+            if str(before.channel.id) not in self.bot.rooms:
+                await self.bot.rooms[str(after.channel.id)]['tc'].set_permissions(member, read_message=True)
             if self.bot.rooms[str(before.channel.id)]['author'].id == member.id:
                 await self.on_member_leave(member, before)
                 

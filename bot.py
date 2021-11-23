@@ -5,8 +5,10 @@ bot = Thalia()
 
 def main():
     """Builds and runs Thalia."""
-    for item in bot.config.EXTENSIONS:
-        bot.load_extension(item)
-    
+    for ext in bot.config.EXTENSIONS:
+        bot.load_extension(ext)
+
     bot.run(bot.config.TOKEN)
     
+if __name__ == "__main__":
+  main()

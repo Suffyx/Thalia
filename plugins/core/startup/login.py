@@ -29,6 +29,7 @@ from core import Thalia
 
 from subprocess import call
 from os import chdir
+import os
 
 
 class Login(commands.Cog):
@@ -38,12 +39,12 @@ class Login(commands.Cog):
        bot: core.Thalia - The bot on which the cog is loaded. Passed by setup function in plugins/core/__init__.py
     """
 
-    def __init__(self, bot: Wilson):
+    def __init__(self, bot: Thalia):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_ready():
+    async def on_ready(self):
         """Run script 'initializedThalia.sh' so that startup messages continue output even if Thalia is silenced or made a background process."""
-        chdir("../../../scripts/")
-        call("./initializedThalia.sh", shell=True)
-        chdir("../plugins/core/startup/")
+        chdir(self.bot.config.SCRIPTS_DIRECTORY)
+        os.system("bash initializedThalia.sh")
+        chdir(self.bot.config.WORKING_DIRECTORY)

@@ -25,7 +25,7 @@ SOFTWARE.
 from core import Thalia
 
 from plugins.rooms.events import EventHandler
-from plugins.rooms.commands import RoomCommands 
+# from plugins.rooms.commands import RoomCommands 
 
 
 def setup(bot: Thalia):
@@ -35,4 +35,4 @@ def setup(bot: Thalia):
        bot: core.Thalia - The bot the cog is loaded onto. Passed by discord.py
     """
     bot.add_cog(EventHandler(bot))
-    bot.add_cog(RoomCommands(bot))
+    # bot.add_cog(RoomCommands(bot))

@@ -27,9 +27,11 @@ import discord
 from discord.ext import commands
 
 from core import Thalia
+from core import Context
 
 from subprocess import call
 from os import chdir
+import os
 
 
 class ErrorHandler(commands.Cog):
@@ -39,18 +41,18 @@ class ErrorHandler(commands.Cog):
        bot: core.Thalia - The bot on which the cog is loaded. Passed by setup function in plugins/core/__init__.py
     """
 
-    def __init__(self, bot: Thalia:
+    def __init__(self, bot: Thalia):
         self.bot = bot
 
     @commands.Cog.listener()
-    async def on_slash_command_error(ctx: Context, error: Exception):
+    async def on_command_error(self, ctx: Context, error: Exception):
         """Run script 'thaliaError.sh', and pass the error, so that error messages continue output even if Thalia is silenced or made a background process.
 
         Parameters:
            ctx: core.Context - The context for the command which produced the error
            error: Exception - The exception which was produced by the command. Not to be confused with outputs of the core.Context.error() method
         """
-        chdir("../../../scripts/")
-        i = error.replace("'", "\\'")
-        call(f"./thaliaError.sh '{i}'", shell=True)
-        chdir("../plugins/core/error/")
+        i = error.__repr__().replace("'", "\\'").replace("(", "").replace(")", "")
+        chdir(self.bot.config.SCRIPTS_DIRECTORY)
+        os.system(f"bash thaliaError.sh {i}")
+        chdir(self.bot.config.SCRIPTS_DIRECTORY)
