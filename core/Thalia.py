@@ -37,14 +37,14 @@ from discord.interactions import Interaction
 
 # from utils import __build_database
 
-def __recursive_object_builder(d):
+def recursive_object_builder(d):
     """Returns a dictionary as an object class.
 
     Parameters:
       d: dict - The dictionary whose keys and values will become an object.
     """
     if isinstance(d, list):
-        d = [__recursive_object_builder(x) for x in d]
+        d = [recursive_object_builder(x) for x in d]
 
     if not isinstance(d, dict):
         return d
@@ -55,7 +55,7 @@ def __recursive_object_builder(d):
     obj = Obj()
 
     for o in d:
-        obj.__dict__[o] = __recursive_object_builder(d[o])
+        obj.__dict__[o] = recursive_object_builder(d[o])
 
     return obj
 
@@ -92,9 +92,6 @@ class Thalia(commands.AutoShardedBot):
 
         # makes sure that the database has all necessary attributes to run the bot properly
         #     __build_database(self.db)
-
-        for ext in self.config.EXTENSIONS:
-            self.load_extension(ext)
             
         self.rooms = {} # set up rooms dictionary so that plugins.rooms.EventHandler and plugins.rooms.RoomCommands can remain consistent
 
@@ -114,13 +111,13 @@ class Thalia(commands.AutoShardedBot):
         if self.__config_state:
             return self.__config
         with open(os.getenv("CONFIG_PATH")) as f:
-            config_obj = __recursive_object_builder(json.load(f))
+            config_obj = recursive_object_builder(json.load(f))
 
         self.__config_state = True
         self.__config = config_obj
         return config_obj
 
-    def __get_prefix(self, message: discord.Message):
+    def __get_prefix(self, bot, message: discord.Message):
         """Returns a guild's set prefix or the default prefix.
 
         Parameters:
