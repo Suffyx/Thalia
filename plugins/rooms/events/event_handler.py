@@ -22,12 +22,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+import asycnio
+
 import discord
 from discord.ext import commands
 
 from core import Thalia
 
 from constants import VOICE_JOIN_ID
+from constants import GENERAL_CATEGORY_ID
+
+from async_timeout import timeout
 
 class EventHandler(commands.Cog):
     """Initialize EventHandler Cog
