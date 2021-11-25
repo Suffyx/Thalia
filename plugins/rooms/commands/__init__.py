@@ -22,17 +22,4 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from core import Thalia
-
-from plugins.rooms.events import EventHandler
-from plugins.rooms.commands import RoomCommands
-
-
-def setup(bot: Thalia):
-    """Sets up the cogs from the core module.
-
-    Parameters:
-       bot: core.Thalia - The bot the cog is loaded onto. Passed by discord.py
-    """
-    bot.add_cog(EventHandler(bot))
-    bot.add_cog(RoomCommands(bot))
+from plugins.rooms.commands.room_commands import RoomCommands

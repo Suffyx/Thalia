@@ -1,4 +1,4 @@
-pip install -r requirements.txt > /dev/null &
+pip install -r requirements.txt 
 echo "Installing Dependencies..."
 echo -ne '#              \r'
 sleep 1

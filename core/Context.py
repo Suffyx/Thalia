@@ -43,10 +43,8 @@ from discord.message import Message
 from discord.user import User
 from discord.utils import cached_property
 
-__all__ = (
-    "ApplicationContext",
-    "AutocompleteContext"
-)
+__all__ = ("ApplicationContext", "AutocompleteContext")
+
 
 class Context(discord.abc.Messageable):
     """Represents a Discord application command interaction context.
@@ -117,7 +115,11 @@ class Context(discord.abc.Messageable):
 
     @property
     def respond(self):
-        return self.followup.send if self.response.is_done() else self.interaction.response.send_message
+        return (
+            self.followup.send
+            if self.response.is_done()
+            else self.interaction.response.send_message
+        )
 
     @property
     def defer(self):
@@ -144,9 +146,9 @@ class Context(discord.abc.Messageable):
         """Optional[:class:`.Cog`]: Returns the cog associated with this context's command. ``None`` if it does not exist."""
         if self.command is None:
             return None
-       
+
         return self.command.cog
-    
+
     async def error(self, content: str) -> Message:
         """Display's a[n] Thalia exception.
 
