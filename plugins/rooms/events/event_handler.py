@@ -83,6 +83,9 @@ class EventHandler(commands.Cog):
            before: payload - The data object of the state before the update.
            after: payload - The data object of the state after the update.
         """
+        if before.channel.members == after.channel.members and before.channel.id == after.channel.id: # Ignore non join, move, or leave events
+            return
+        
         # on join
         if before.channel is None and after.channel is not None:
             await self.on_member_join(member, after)
