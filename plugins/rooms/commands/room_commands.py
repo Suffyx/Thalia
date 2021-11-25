@@ -136,7 +136,7 @@ class RoomCommands(commands.Cog):
 
     @slash_command(name="bitrate", description="Edits the bitrate of a lounge channel.")
     async def _bitrate(
-        self, ctx, bitrate: Option(int, "A bitrate between 8 and 96 for the channel.")
+        self, ctx, bitrate: Option(int, "A bitrate between 8 and 96kb for the channel.")
     ):
         if ctx.author.voice is None:
             return await ctx.respond("You must be in a lounge to use this command.")
@@ -150,13 +150,13 @@ class RoomCommands(commands.Cog):
         ):
             return await ctx.respond("You must own the room to use this command.")
 
-        if bitrate < 8 or birate > 96:
-            return await ctx.respond("Birate must be a number between 8 and 96.")
+        if bitrate < 8 or bitrate > 96:
+            return await ctx.respond("Bitrate must be a number between 8 and 96kb.")
 
         await self.bot.rooms[str(ctx.author.voice.channel.id)]["vc"].edit(
-            bitrate=bitrate
+            bitrate=bitrate * 1000
         )
-        await ctx.respond(f"Birate set to **{bitrate}**")
+        await ctx.respond(f"Bitrate set to **{bitrate}kb**")
 
     @slash_command(name="lock", description="Locks a channel from members.")
     async def _lock(self, ctx):
@@ -176,7 +176,7 @@ class RoomCommands(commands.Cog):
         if "locked" in self.bot.rooms[str(ctx.author.voice.channel.id)]:
             if self.bot.rooms[str(ctx.author.voice.channel.id)]["locked"] == True:
                 await self.bot.rooms[str(ctx.author.voice.channel.id)]["vc"].edit(
-                    user_limit=None
+                    user_limit=0
                 )
                 await self.bot.rooms[str(ctx.author.voice.channel.id)][
                     "vc"
@@ -304,9 +304,7 @@ class RoomCommands(commands.Cog):
         ):
             return await ctx.respond("You must own the room to use this command.")
 
-        await self.bot.rooms[str(ctx.author.voice.channel.id)]["vc"].edit(
-            user_limit=None
-        )
+        await self.bot.rooms[str(ctx.author.voice.channel.id)]["vc"].edit(user_limit=0)
         await ctx.respond("Limit has been removed from the lounge channel.")
 
     @slash_command(name="invite", description="Invites a user to a voice channel.")
